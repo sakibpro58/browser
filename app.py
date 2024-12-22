@@ -19,7 +19,7 @@ def home():
         <title>Super Light Browser</title>
     </head>
     <body>
-        <h1>Super Light Browser</h1>
+        <h1>AB Super Light Browser</h1>
         <form method="GET" action="/browse">
             <label for="url">Enter URL:</label>
             <input type="text" name="url" id="url" placeholder="https://example.com" required>
