@@ -1,6 +1,8 @@
+import os
 from flask import Flask, request, jsonify, render_template_string
 from flask_talisman import Talisman
 import httpx
+from bs4 import BeautifulSoup  # Added for parsing HTML titles
 
 app = Flask(__name__)
 
@@ -38,14 +40,21 @@ def browse():
         return jsonify({"error": "Invalid URL format. Ensure it starts with http:// or https://"}), 400
     try:
         with httpx.Client() as client:
-            response = client.get(url)
+            response = client.get(url, timeout=10)
+            # Extract the title from the HTML if available
+            soup = BeautifulSoup(response.text, "html.parser")
+            title = soup.title.string if soup.title else "No Title Found"
         return jsonify({
             "status": response.status_code,
-            "title": "No Title Found",  # Replace with parsing logic if needed
+            "title": title,
             "content": response.text[:500]  # Partial content
         })
+    except httpx.RequestError as e:
+        return jsonify({"error": f"Request failed: {str(e)}"}), 500
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    # Bind to the PORT environment variable, default to 5000
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
