@@ -1,7 +1,13 @@
 from flask import Flask, request, jsonify, render_template_string
+from flask_talisman import Talisman
 from requests_html import HTMLSession
 
 app = Flask(__name__)
+
+# Flask-Talisman for Security Headers
+Talisman(app, content_security_policy=None)
+
+# Initialize HTMLSession
 session = HTMLSession()
 
 # Home Route
@@ -16,7 +22,7 @@ def home():
         <title>Super Light Browser</title>
     </head>
     <body>
-        <h1>Super Light Browser</h1>
+        <h1>Abridge Super Light Browser</h1>
         <form method="GET" action="/browse">
             <label for="url">Enter URL:</label>
             <input type="text" name="url" id="url" placeholder="https://example.com" required>
