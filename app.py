@@ -1,14 +1,11 @@
 from flask import Flask, request, jsonify, render_template_string
 from flask_talisman import Talisman
-from requests_html import HTMLSession
+import httpx
 
 app = Flask(__name__)
 
 # Flask-Talisman for Security Headers
 Talisman(app, content_security_policy=None)
-
-# Initialize HTMLSession
-session = HTMLSession()
 
 # Home Route
 @app.route("/")
@@ -22,7 +19,7 @@ def home():
         <title>Super Light Browser</title>
     </head>
     <body>
-        <h1>Abridge Super Light Browser</h1>
+        <h1>Super Light Browser</h1>
         <form method="GET" action="/browse">
             <label for="url">Enter URL:</label>
             <input type="text" name="url" id="url" placeholder="https://example.com" required>
@@ -40,12 +37,12 @@ def browse():
     if not url.startswith("http"):
         return jsonify({"error": "Invalid URL format. Ensure it starts with http:// or https://"}), 400
     try:
-        response = session.get(url)
-        response.html.render(timeout=20)  # JavaScript rendering
+        with httpx.Client() as client:
+            response = client.get(url)
         return jsonify({
             "status": response.status_code,
-            "title": response.html.find("title", first=True).text if response.html.find("title", first=True) else "No Title Found",
-            "content": response.html.html[:500]  # Partial content
+            "title": "No Title Found",  # Replace with parsing logic if needed
+            "content": response.text[:500]  # Partial content
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
